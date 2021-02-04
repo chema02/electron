@@ -1,15 +1,22 @@
 // Modules to control application life and create native browser window
-const {app, BrowserWindow} = require('electron')
-const path = require('path')
+const {app, BrowserWindow,ipcMain} = require('electron');
+const path = require('path');
 
+let mainWindow = {};
 function createWindow () {
   // Create the browser window.
-  const mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
+  mainWindow = new BrowserWindow({
+    width: 1024,
+    height: 768,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js')
-    }
+      preload: path.join(__dirname, 'preload.js'),
+
+      nodeIntegration: true,
+      contextIsolation:true
+    },
+    resizable:true,
+    closable:true,
+    alwaysOnTop:false
   })
 
   // and load the index.html of the app.
@@ -30,6 +37,11 @@ app.whenReady().then(() => {
     // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
+  ipcMain.on('message:hola' , (event, message) => {
+    console.log('recibido de mani proceso', message);
+    mainWindow.webContents.send('message:back', 'mensaje recibido en el main proceso' )
+  })
+
 })
 
 // Quit when all windows are closed, except on macOS. There, it's common
